@@ -2,20 +2,26 @@ package api.media.kg.controller;
 
 import api.media.kg.dto.RegistrationDTO;
 import api.media.kg.dto.SimpleResponse;
+import api.media.kg.exception.BadRequestException;
 import api.media.kg.service.AuthService;
-import org.springframework.beans.factory.annotation.Autowired;
+import jakarta.validation.Valid;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
-@RequestMapping("/auth")
+@RequestMapping("/api/auth")
 public class AuthController {
-    @Autowired
-    private AuthService authService;
+
+    private final AuthService authService;
+
+    public AuthController(AuthService authService) {
+        this.authService = authService;
+    }
 
     @PostMapping("/registration")
-    public SimpleResponse registration(@RequestBody RegistrationDTO registration) {
-            authService.Registration(registration);
-            return new SimpleResponse(HttpStatus.OK, "Success");
+    public SimpleResponse registration(@Valid @RequestBody RegistrationDTO registration) throws BadRequestException {
+        authService.registration(registration);
+        return new SimpleResponse(HttpStatus.OK, "Registration successful");
     }
 }

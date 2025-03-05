@@ -1,13 +1,10 @@
 package api.media.kg.exception;
-
 import org.springframework.http.HttpStatus;
-
 
 public class ExceptionResponse {
     private HttpStatus httpStatus;
     private String className;
     private String message;
-
 
     public ExceptionResponse(HttpStatus httpStatus, String className, String message) {
         this.httpStatus = httpStatus;
