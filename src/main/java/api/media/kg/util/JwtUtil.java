@@ -16,15 +16,17 @@ import java.util.stream.Collectors;
 public class JwtUtil {
     private static final int tokenLiveTime = 1000 * 3600 * 24; // 1-day
     private static final String secretKey = "veryLongSecretmazgillattayevlasharaaxmojonjinnijonsurbetbekkiydirhonuxlatdibekloxovdangasabekochkozjonduxovmashaynikmaydagapchishularnioqiganbolsangizgapyoqaniqsizmazgi";
-    public static String encode(Long id, List<ProfileRole> roleList) {
+    public static String encode(String username, Long id, List<ProfileRole> roleList) {
         String strRoles = roleList.stream().map(Enum::name)
                 .collect(Collectors.joining(","));
         Map<String, String> claims = new HashMap<>();
         claims.put("roles",strRoles);
+        claims.put("id", String.valueOf(id));
         return Jwts
                 .builder()
-                .setSubject(String.valueOf(id))
-                .setClaims(claims)
+                .setSubject(username)
+                .claim("roles", strRoles) // roles claim
+                .claim("id", id) // id claim
                 .setIssuedAt(new Date(System.currentTimeMillis()))
                 .setExpiration(new Date(System.currentTimeMillis() + tokenLiveTime))
                 .signWith(getSignInKey())
@@ -37,13 +39,13 @@ public class JwtUtil {
                 .build()
                 .parseClaimsJws(token)
                 .getBody();
-        Long id = Long.valueOf(claims.getSubject());
+        String username = claims.getSubject();
+        Long id = Long.valueOf(claims.get("id").toString());
         String strRole = claims.get("roles").toString();
        List<ProfileRole> roleList = Arrays.stream(strRole.split(",")).map(ProfileRole::valueOf).toList();
-        return new JwtResponseDTO(id,roleList);
+        return new JwtResponseDTO(id, username,roleList);
 
     }
-
 
 
     public static String encode(Long id) {

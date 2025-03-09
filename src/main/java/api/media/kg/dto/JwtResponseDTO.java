@@ -7,11 +7,21 @@ import java.util.List;
 
 public class JwtResponseDTO {
     private Long id;
+    private String username;
     private List<ProfileRole> roleList;
 
-    public JwtResponseDTO(Long id, List<ProfileRole> roleList) {
+    public JwtResponseDTO(Long id, String username, List<ProfileRole> roleList) {
         this.id = id;
+        this.username = username;
         this.roleList = roleList;
+    }
+
+    public String getUsername() {
+        return username;
+    }
+
+    public void setUsername(String username) {
+        this.username = username;
     }
 
     public Long getId() {
