@@ -18,7 +18,6 @@ public interface ProfileRoleRepository extends JpaRepository<ProfileRoleEntity, 
     @Query("delete from ProfileRoleEntity where profileId = :profileId")
     int deleteByProfileId(@Param("profileId") Long profileId);
 
-    List<ProfileRoleEntity> findAllByProfileId(Long id);
     @Query("select p.roles from ProfileRoleEntity p where p.profile.id = :profileId")
     List<ProfileRole> getAllRolesListByProfile(Long profileId);
 }

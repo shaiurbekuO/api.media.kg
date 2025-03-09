@@ -2,6 +2,7 @@ package api.media.kg.config.security;
 
 import api.media.kg.entity.ProfileEntity;
 import api.media.kg.entity.ProfileRoleEntity;
+import api.media.kg.enums.ProfileRole;
 import api.media.kg.repository.ProfileRepository;
 import api.media.kg.repository.ProfileRoleRepository;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -27,7 +28,7 @@ public class UserDetailsServiceImpl implements UserDetailsService {
         ProfileEntity profile = profileRepository.findByUsernameAndVisibleTrue(username)
                 .orElseThrow(() -> new UsernameNotFoundException("User not found with username: " + username));
         
-        List<ProfileRoleEntity> roles = profileRoleRepository.findAllByProfileId(profile.getId());
+        List<ProfileRole> roles = profileRoleRepository.getAllRolesListByProfile(profile.getId());
         
         return new UserDetailsImpl(profile, roles);
     }
