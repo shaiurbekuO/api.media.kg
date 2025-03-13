@@ -9,6 +9,8 @@ import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.stereotype.Service;
 
+import java.util.concurrent.CompletableFuture;
+
 @Service
 public class EmailSendingService {
     @Value("${spring.mail.username}")
@@ -18,25 +20,62 @@ public class EmailSendingService {
     public EmailSendingService(JavaMailSender javaMailSender) {
         this.javaMailSender = javaMailSender;
     }
+    public void sendRegistrationEmail(String email, Long profileId) {
+        if (email == null || profileId == null) {
+            throw new IllegalArgumentException("Email жана profileId бош болбошу керек");
+        }
 
-    public void sendEmail(String email, Long profileId) {
-        String subject = "Registration";
-        String body = "You have successfully registered! "+ JwtUtil.encode(profileId);
-        sendSimpleEmail(email, subject, body);
+        String subject = "Каттоону бүтүрүү";
+        String token = JwtUtil.encode(profileId);
+        if (token == null) {
+            throw new RuntimeException("Токен түзүү иши ишке ашпады");
+        }
+
+        // HTML форматына token кошуу
+        String body = String.format("<!DOCTYPE html>\n" +
+                "<html lang=\"ky\">\n" +
+                "<head>\n" +
+                "    <meta charset=\"UTF-8\">\n" +
+                "    <title>Каттоону бүтүрүү</title>\n" +
+                "    <style>\n" +
+                "        .link {\n" +
+                "            color: blue; /* көк түс */\n" +
+                "            text-decoration: underline; /* сызык кошуу */\n" +
+                "        }\n" +
+                "\n" +
+                "        .link:hover {\n" +
+                "            color: darkblue; /* үстүнө чыкканда түсү өзгөрөт */\n" +
+                "        }\n" +
+                "    </style>\n" +
+                "</head>\n" +
+                "<body>\n" +
+                "\n" +
+                "<h1 style=\"text-align: center\">Каттоону бүтүрүү</h1>\n" +
+                "<p>Салам, кандайсыз?</p>\n" +
+                "<p>\n" +
+                "    Каттоону бүтүрүү үчүн төмөнкү шилтемени басыңыз: <a class=\"link\"\n" +
+                "                                                           href=\"http://localhost:8080/api/auth/reg-validation/%s\"\n" +
+                "                                                           target=\"_blank\">Бул жерди басыңыз</a>\n" +
+                "</p>\n" +
+                "\n" +
+                "</body>\n" +
+                "</html>", token); // token параметри URLга кошулат
+
+        sendMimeEmail(email, subject, body);
     }
     private void sendMimeEmail(String email, String subject, String body) {
-
         try {
             MimeMessage msg = javaMailSender.createMimeMessage();
             msg.setFrom(fromAccount);
-
             MimeMessageHelper helper = new MimeMessageHelper(msg, true);
             helper.setTo(email);
             helper.setSubject(subject);
             helper.setText(body, true);
-            javaMailSender.send(msg);
+            CompletableFuture.runAsync(()->{
+                javaMailSender.send(msg);
+            });
         } catch (MessagingException e) {
-            e.printStackTrace();
+            throw new RuntimeException("Email sending failed", e);
         }
     }
 

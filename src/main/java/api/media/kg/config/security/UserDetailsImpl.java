@@ -32,14 +32,6 @@ public class UserDetailsImpl implements UserDetails {
                 .map(role -> new SimpleGrantedAuthority(role.name())).toList();
 
     }
-//    public UserDetailsImpl(ProfileEntity profile, List<ProfileRoleEntity> roles) {
-//        this.username = profile.getUsername();
-//        this.password = profile.getPassword();
-//        this.authorities = roles.stream()
-//                .map(role -> new SimpleGrantedAuthority(role.getRoles().name()))
-//                .collect(Collectors.toList());
-//        this.isActive = profile.getStatus() == GeneralStatus.ACTIVE;
-//    }
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
