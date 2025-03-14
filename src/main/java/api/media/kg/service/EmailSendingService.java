@@ -1,5 +1,6 @@
 package api.media.kg.service;
 
+import api.media.kg.enums.AppLanguage;
 import api.media.kg.util.JwtUtil;
 import jakarta.mail.MessagingException;
 import jakarta.mail.internet.MimeMessage;
@@ -20,18 +21,9 @@ public class EmailSendingService {
     public EmailSendingService(JavaMailSender javaMailSender) {
         this.javaMailSender = javaMailSender;
     }
-    public void sendRegistrationEmail(String email, Long profileId) {
-        if (email == null || profileId == null) {
-            throw new IllegalArgumentException("Email жана profileId бош болбошу керек");
-        }
-
+    public void sendRegistrationEmail(String email, Long profileId, AppLanguage lang) {
         String subject = "Каттоону бүтүрүү";
         String token = JwtUtil.encode(profileId);
-        if (token == null) {
-            throw new RuntimeException("Токен түзүү иши ишке ашпады");
-        }
-
-        // HTML форматына token кошуу
         String body = String.format("<!DOCTYPE html>\n" +
                 "<html lang=\"ky\">\n" +
                 "<head>\n" +
@@ -54,12 +46,12 @@ public class EmailSendingService {
                 "<p>Салам, кандайсыз?</p>\n" +
                 "<p>\n" +
                 "    Каттоону бүтүрүү үчүн төмөнкү шилтемени басыңыз: <a class=\"link\"\n" +
-                "                                                           href=\"http://localhost:8080/api/auth/reg-validation/%s\"\n" +
+                "                                                           href=\"http://localhost:8080/api/auth/reg-validation/%s?lang=%s\"\n" +
                 "                                                           target=\"_blank\">Бул жерди басыңыз</a>\n" +
                 "</p>\n" +
                 "\n" +
                 "</body>\n" +
-                "</html>", token); // token параметри URLга кошулат
+                "</html>", token, lang);
 
         sendMimeEmail(email, subject, body);
     }

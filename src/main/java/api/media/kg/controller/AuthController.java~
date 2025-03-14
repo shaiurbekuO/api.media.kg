@@ -27,7 +27,7 @@ public class AuthController {
     }
     @GetMapping("/reg-validation/{token}")
     public SimpleResponse emailValidation(@PathVariable("token") String token,
-                                          @RequestParam(value = "lang", defaultValue = "KG") AppLanguage lang) {
+                                          @RequestParam(value = "lang", defaultValue = ) AppLanguage lang) {
         return authService.registrationEmailValidation(token, lang);
     }
     
