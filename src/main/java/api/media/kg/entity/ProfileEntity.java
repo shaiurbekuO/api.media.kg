@@ -1,5 +1,6 @@
 package api.media.kg.entity;
 
+import api.media.kg.enums.AppLanguage;
 import api.media.kg.enums.GeneralStatus;
 import jakarta.persistence.*;
 import lombok.Getter;
@@ -27,6 +28,9 @@ public class ProfileEntity {
 
     @Column(name = "created_date")
     private LocalDate createdDate;
+    @Column(name = "lang")
+    @Enumerated(EnumType.STRING)
+    private AppLanguage lang;
 
     public ProfileEntity() {
     }
@@ -85,5 +89,13 @@ public class ProfileEntity {
 
     public void setCreatedDate(LocalDate createdDate) {
         this.createdDate = createdDate;
+    }
+
+    public AppLanguage getLang() {
+        return lang;
+    }
+
+    public void setLang(AppLanguage lang) {
+        this.lang = lang;
     }
 }
