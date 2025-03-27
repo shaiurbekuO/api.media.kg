@@ -26,10 +26,11 @@ public class AuthService {
     private final EmailSendingService emailSendingService;
     private final ProfileService profileService;
     private final ResourceBundleService bundleService;
+    private final SmsSendService smsSendService;
 
     public AuthService(ProfileRepository profileRepository, ProfileRoleRepository profileRoleRepository,
                        PasswordEncoder passwordEncoder,
-                       ProfileRoleService profileRoleService, EmailSendingService emailSendingService, ProfileService profileService, ResourceBundleService resourceBundleService
+                       ProfileRoleService profileRoleService, EmailSendingService emailSendingService, ProfileService profileService, ResourceBundleService resourceBundleService, SmsSendService smsSendService
     ){
         this.profileRepository = profileRepository;
         this.profileRoleRepository = profileRoleRepository;
@@ -38,6 +39,7 @@ public class AuthService {
         this.emailSendingService = emailSendingService;
         this.profileService = profileService;
         this.bundleService = resourceBundleService;
+        this.smsSendService = smsSendService;
     }
 
 
@@ -64,7 +66,9 @@ public class AuthService {
 //*      insert role
         profileRoleService.createProfileRole(newProfile.getId(), ProfileRole.ROLE_USER);
 //*      send email
-        emailSendingService.sendRegistrationEmail(registrationDTO.getUsername(), newProfile.getId(), lang);
+//        emailSendingService.sendRegistrationEmail(registrationDTO.getUsername(), newProfile.getId(), lang);
+//*      send sms
+        smsSendService.SendRegistrationSms(registrationDTO.getUsername());
         return new SimpleResponse(HttpStatus.OK, bundleService.getMessage("email.confirm.send", lang));
     }
 
@@ -85,6 +89,7 @@ public class AuthService {
            throw new BadRequestException(bundleService.getMessage("verification.failed", lang));}
         return new SimpleResponse(HttpStatus.OK, bundleService.getMessage("registration.successful", lang));
     }
+
 
     public ProfileDTO login(LoginDTO loginDTO, AppLanguage lang) {
         Optional<ProfileEntity> profile = profileRepository.findByUsernameAndVisibleTrue(loginDTO.getUsername());
