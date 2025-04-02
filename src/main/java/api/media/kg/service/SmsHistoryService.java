@@ -12,7 +12,7 @@ import java.util.Optional;
 
 @Service
 public class SmsHistoryService {
-  private final SmsHistoryRepository smsHistoryRepository;
+    private final SmsHistoryRepository smsHistoryRepository;
     private final ResourceBundleService bundleService;
 
     public SmsHistoryService(SmsHistoryRepository smsHistoryRepository, ResourceBundleService bundleService) {

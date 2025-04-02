@@ -14,10 +14,10 @@ import java.util.Optional;
 
 @Repository
 public interface EmailHistoryRepository extends JpaRepository<EmailHistoryEntity, String> {
-    @Query("SELECT COUNT(s) FROM SmsHistoryEntity s WHERE s.phone = :phone AND s.createdDate BETWEEN :from AND :to")
-    Long countByPhoneAndCreatedDateBetween(@Param("phone") String phone, @Param("from") LocalDateTime from, @Param("to") LocalDateTime to);
+    @Query("SELECT COUNT(s) FROM EmailHistoryEntity s WHERE s.email = :email AND s.createdDate BETWEEN :from AND :to")
+    Long countByEmailAndCreatedDateBetween(@Param("email") String email, @Param("from") LocalDateTime from, @Param("to") LocalDateTime to);
 
-    Optional<SmsHistoryEntity> findTop1ByPhoneOrderByCreatedDateDesc(String phone);
+    Optional<EmailHistoryEntity> findTop1ByEmailOrderByCreatedDateDesc(String email);
     @Transactional
     @Modifying
     @Query("update EmailHistoryEntity s set s.attemptCount = coalesce(s.attemptCount, 0) + 1 where s.id = :id")
