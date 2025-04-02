@@ -11,17 +11,15 @@ public class EmailHistoryEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     private String id;
-    @Column(name = "phone")
-    private String phone;
-    @Column(name = "message", columnDefinition = "TEXT")
-    private String message;
+    @Column(name = "email")
+    private String email;
     @Column(name = "code")
     private String code;
     @Column(name = "created_date")
     private LocalDateTime createdDate;
-    @Column(name = "sms_type")
+    @Column(name = "email_type")
     @Enumerated(EnumType.STRING)
-    private SmsType smsType;
+    private SmsType emailType;
     @Column(name = "attempt_count")
     private Integer attemptCount = 0;
 
@@ -29,24 +27,16 @@ public class EmailHistoryEntity {
         return id;
     }
 
+    public String getEmail() {
+        return email;
+    }
+
+    public void setEmail(String email) {
+        this.email = email;
+    }
+
     public void setId(String id) {
         this.id = id;
-    }
-
-    public String getPhone() {
-        return phone;
-    }
-
-    public void setPhone(String phone) {
-        this.phone = phone;
-    }
-
-    public String getMessage() {
-        return message;
-    }
-
-    public void setMessage(String message) {
-        this.message = message;
     }
 
     public String getCode() {
@@ -65,12 +55,12 @@ public class EmailHistoryEntity {
         this.createdDate = createdDate;
     }
 
-    public SmsType getSmsType() {
-        return smsType;
+    public SmsType getEmailType() {
+        return emailType;
     }
 
-    public void setSmsType(SmsType smsType) {
-        this.smsType = smsType;
+    public void setEmailType(SmsType emailType) {
+        this.emailType = emailType;
     }
 
     public Integer getAttemptCount() {

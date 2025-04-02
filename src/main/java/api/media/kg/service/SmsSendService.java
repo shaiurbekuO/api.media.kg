@@ -34,7 +34,8 @@ public class SmsSendService {
     private String accountLogin;
     @Value("${eskiz.password}")
     private String accountPassword;
-    private final Integer limit = 3;
+    @Value("${sms.limit}")
+    private Integer limit;
 
     public SmsSendService(RestTemplate restTemplate, SmsProviderHolderRepository smsProviderHolderRepository, SmsHistoryService smsHistoryService) {
         this.restTemplate = restTemplate;

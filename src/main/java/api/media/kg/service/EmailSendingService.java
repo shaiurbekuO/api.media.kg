@@ -1,6 +1,8 @@
 package api.media.kg.service;
 
 import api.media.kg.enums.AppLanguage;
+import api.media.kg.enums.SmsType;
+import api.media.kg.exception.BadRequestException;
 import api.media.kg.util.JwtUtil;
 import api.media.kg.util.RandomUtil;
 import jakarta.mail.MessagingException;
@@ -20,9 +22,14 @@ public class EmailSendingService {
     @Value("${spring.mail.username}")
     private String fromAccount;
     private final JavaMailSender javaMailSender;
+    private final EmailHistoryService emailHistoryService;
+    @Value("${sms.limit}")
+    private Integer limit;
 
-    public EmailSendingService(JavaMailSender javaMailSender) {
+
+    public EmailSendingService(JavaMailSender javaMailSender, EmailHistoryService emailHistoryService) {
         this.javaMailSender = javaMailSender;
+        this.emailHistoryService = emailHistoryService;
     }
     public void sendRegistrationEmail(String email, Long profileId, AppLanguage lang) {
         String token = JwtUtil.encode(profileId);
@@ -97,7 +104,7 @@ public class EmailSendingService {
 
         sendMimeEmail(email, subject, body);
     }
-    public void sendResetPasswordEmail(String email,  AppLanguage lang) {
+    public void sendResetPasswordEmail(String email, AppLanguage lang) {
         String code = RandomUtil.getRandomSmsCode();
         // Темаларды (subjects) аныктайбыз
         Map<AppLanguage, String> subjects = new HashMap<>();
@@ -113,21 +120,20 @@ public class EmailSendingService {
 
         // Текстти аныктайбыз
         Map<AppLanguage, String> messages = new HashMap<>();
-        messages.put(AppLanguage.KG, "Сырсөздү ырастоо үчүн төмөнкү шилтемени басыңыз:");
-        messages.put(AppLanguage.RU, "Нажмите на ссылку ниже, чтобы подтвердить свой пароль.:");
-        messages.put(AppLanguage.EN, "Click the link below to confirm your password.:");
+        messages.put(AppLanguage.KG, "Сырсөздү ырастоо үчүн төмөнкү код колдонуңуз: %s");
+        messages.put(AppLanguage.RU, "Используйте следующий код для подтверждения сброса пароля: %s");
+        messages.put(AppLanguage.EN, "Use the following code to confirm your password reset: %s");
 
         // Шилтеме текстин аныктайбыз
         Map<AppLanguage, String> linkTexts = new HashMap<>();
-        linkTexts.put(AppLanguage.KG, "Бул жерди басыңыз");
-        linkTexts.put(AppLanguage.RU, "Нажмите здесь");
-        linkTexts.put(AppLanguage.EN, "Click here");
+        linkTexts.put(AppLanguage.RU, "Подтвердить сброс пароля");
+        linkTexts.put(AppLanguage.EN, "Confirm Password Reset");
 
         // Тилге жараша текстти тандайбыз
         String subject = subjects.getOrDefault(lang, subjects.get(AppLanguage.KG));
         String greeting = greetings.getOrDefault(lang, greetings.get(AppLanguage.KG));
-        String message = messages.getOrDefault(lang, messages.get(AppLanguage.KG));
-        String linkText = linkTexts.getOrDefault(lang, linkTexts.get(AppLanguage.KG));
+        String messageTemplate = messages.getOrDefault(lang, messages.get(AppLanguage.KG));
+        String message = String.format(messageTemplate, code);
 
         String body = String.format("<!DOCTYPE html>\n" +
                         "<html lang=\"%s\">\n" +
@@ -135,13 +141,14 @@ public class EmailSendingService {
                         "    <meta charset=\"UTF-8\">\n" +
                         "    <title>%s</title>\n" +
                         "    <style>\n" +
-                        "        .link {\n" +
-                        "            color: blue;\n" +
-                        "            text-decoration: underline;\n" +
-                        "        }\n" +
-                        "\n" +
-                        "        .link:hover {\n" +
-                        "            color: darkblue;\n" +
+                        "        .code {\n" +
+                        "            font-size: 24px;\n" +
+                        "            font-weight: bold;\n" +
+                        "            background-color: #f0f0f0;\n" +
+                        "            padding: 10px;\n" +
+                        "            border-radius: 5px;\n" +
+                        "            margin: 10px 0;\n" +
+                        "            display: inline-block;\n" +
                         "        }\n" +
                         "    </style>\n" +
                         "</head>\n" +
@@ -149,11 +156,8 @@ public class EmailSendingService {
                         "\n" +
                         "<h1 style=\"text-align: center\">%s</h1>\n" +
                         "<p>%s</p>\n" +
-                        "<p>\n" +
-                        "    %s <a class=\"link\"\n" +
-                        "           href=\"http://localhost:8080/api/auth/reg-emailVerification/lang=%s\"\n" +
-                        "           target=\"_blank\">%s</a>\n" +
-                        "</p>\n" +
+                        "<p>%s</p>\n" +
+                        "<p class=\"code\">%s</p>\n" +
                         "\n" +
                         "</body>\n" +
                         "</html>",
@@ -161,12 +165,19 @@ public class EmailSendingService {
                 subject, // title
                 subject, // h1 тексти
                 greeting, // саламдашуу
-                message, // негизги билдирүү
-                lang, // тил параметри
-                linkText // шилтеме тексти
+                message, // негизги билдирүү (кодду камтыйт)
+                code     // кодду өзүнчө көрсөтүү
         );
-
+        checkAndSendMimeEmail(email, subject, body, code);
+    }
+    private void checkAndSendMimeEmail(String email, String subject, String body, String code) {
+        //        *check
+        Long count = emailHistoryService.getEmailCount(email);
+        if(count >= limit) throw new BadRequestException("Email limit reached");
+        //        * send
         sendMimeEmail(email, subject, body);
+        //        * create
+        emailHistoryService.create(email, code, SmsType.RESET_PASSWORD);
     }
 
     private void sendMimeEmail(String email, String subject, String body) {
