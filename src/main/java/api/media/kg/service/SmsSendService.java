@@ -51,7 +51,6 @@ public class SmsSendService {
     public void sendResetPasswordSms(String phoneNumber) {
         String code = RandomUtil.getRandomSmsCode();
         String message = "Bu Eskiz dan test";
-        message = String.format(message, code);
         sendSms(phoneNumber, message, code, SmsType.RESET_PASSWORD);
     }
     private SmsSendResponseDto sendSms(String phoneNumber, String message, String code, SmsType smsType) {

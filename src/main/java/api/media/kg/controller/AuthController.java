@@ -2,6 +2,7 @@ package api.media.kg.controller;
 
 import api.media.kg.dto.*;
 import api.media.kg.dto.auth.RegistrationDTO;
+import api.media.kg.dto.auth.ResetPasswordConfirmDTO;
 import api.media.kg.dto.auth.ResetPasswordDTO;
 import api.media.kg.dto.sms.SmsResendDto;
 import api.media.kg.dto.sms.SmsVerificationDto;
@@ -51,6 +52,11 @@ public class AuthController {
     public SimpleResponse resetPassword(@Valid @RequestBody ResetPasswordDTO dto,
                                                     @RequestHeader(value = "Accept-Language", defaultValue = "EN") AppLanguage lang) {
         return authService.resetPassword(dto, lang);
+    }
+    @PostMapping("/reset-password-confirm")
+    public SimpleResponse resetPasswordConfirm(@Valid @RequestBody ResetPasswordConfirmDTO dto,
+                                        @RequestHeader(value = "Accept-Language", defaultValue = "EN") AppLanguage lang) {
+        return authService.resetPasswordConfirm(dto, lang);
     }
 
 
