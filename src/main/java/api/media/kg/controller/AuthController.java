@@ -1,6 +1,8 @@
 package api.media.kg.controller;
 
 import api.media.kg.dto.*;
+import api.media.kg.dto.auth.RegistrationDTO;
+import api.media.kg.dto.auth.ResetPasswordDTO;
 import api.media.kg.dto.sms.SmsResendDto;
 import api.media.kg.dto.sms.SmsVerificationDto;
 import api.media.kg.enums.AppLanguage;
@@ -25,7 +27,7 @@ public class AuthController {
     }
     @GetMapping("/reg-emailVerification/{token}")
     public SimpleResponse emailVerification(@Valid @PathVariable("token") String token,
-                                          @RequestParam(value = "lang", defaultValue = "KG") AppLanguage lang) {
+                                          @RequestParam(value = "lang", defaultValue = "EN") AppLanguage lang) {
         return authService.registrationEmailVerification(token, lang);
     }
     @PostMapping("/reg-smsVerification")
@@ -42,8 +44,13 @@ public class AuthController {
     
     @PostMapping("/login")
     public ResponseEntity<ProfileDTO> login(@Valid @RequestBody LoginDTO loginDTO,
-                                            @RequestHeader("Accept-Language") AppLanguage lang) {
+                                            @RequestHeader(value = "Accept-Language", defaultValue = "EN") AppLanguage lang) {
         return ResponseEntity.ok(authService.login(loginDTO, lang));
+    }
+    @PostMapping("/reset-password")
+    public SimpleResponse resetPassword(@Valid @RequestBody ResetPasswordDTO dto,
+                                                    @RequestHeader(value = "Accept-Language", defaultValue = "EN") AppLanguage lang) {
+        return authService.resetPassword(dto, lang);
     }
 
 

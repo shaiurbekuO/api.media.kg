@@ -1,4 +1,4 @@
-package api.media.kg.dto;
+package api.media.kg.dto.auth;
 
 import api.media.kg.validation.PasswordValidation;
 import jakarta.validation.constraints.NotBlank;
