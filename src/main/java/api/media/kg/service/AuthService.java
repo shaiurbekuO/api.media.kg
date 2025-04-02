@@ -1,6 +1,8 @@
 package api.media.kg.service;
 
 import api.media.kg.dto.*;
+import api.media.kg.dto.auth.RegistrationDTO;
+import api.media.kg.dto.auth.ResetPasswordDTO;
 import api.media.kg.dto.sms.SmsResendDto;
 import api.media.kg.dto.sms.SmsVerificationDto;
 import api.media.kg.entity.ProfileEntity;
@@ -18,7 +20,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
-import java.util.Locale;
 import java.util.Optional;
 
 @Service
@@ -79,7 +80,7 @@ public class AuthService {
             emailSendingService.sendRegistrationEmail(registrationDTO.getUsername(), newProfile.getId(), lang);
             return new SimpleResponse(HttpStatus.OK, bundleService.getMessage("email.confirm.send", lang));
         } else if (PhoneUtil.isPhone(registrationDTO.getUsername())) {
-            smsSendService.SendRegistrationSms(registrationDTO.getUsername());
+            smsSendService.sendRegistrationSms(registrationDTO.getUsername());
             return new SimpleResponse(HttpStatus.OK, bundleService.getMessage("sms.confirm.send", lang));
         }
 
@@ -145,8 +146,26 @@ public class AuthService {
             throw new BadRequestException(bundleService.getMessage("verification.failed",  lang));
         }
     //*      send sms
-        smsSendService.SendRegistrationSms(dto.getPhone());
+        smsSendService.sendRegistrationSms(dto.getPhone());
         return new SimpleResponse(HttpStatus.OK, bundleService.getMessage("sms.confirm.send", lang));
+    }
+    public SimpleResponse resetPassword(ResetPasswordDTO dto, AppLanguage lang) {
+        Optional<ProfileEntity> optional = profileRepository.findByUsernameAndVisibleTrue(dto.getUsername());
+        if (optional.isEmpty()) {
+            throw new BadRequestException(bundleService.getMessage("profile.not.found", lang));
+        }
+        ProfileEntity profile = optional.get();
+        if(!profile.getStatus().equals(GeneralStatus.ACTIVE)){
+            throw new BadRequestException(bundleService.getMessage("account.is.not.active", lang));
+        }
+        // Send email or SMS based on username type
+        if (EmailUtil.isEmail(dto.getUsername())) {
+            emailSendingService.sendResetPasswordEmail(dto.getUsername(), lang);
+        } else if (PhoneUtil.isPhone(dto.getUsername())) {
+            smsSendService.sendResetPasswordSms(dto.getUsername());
+        }
+        String response = bundleService.getMessage("reset.password.successful", lang);
+        return new SimpleResponse(HttpStatus.OK, String.format(response, dto.getUsername()));
     }
     public ProfileDTO getLogInResponse(ProfileEntity profile) {
         ProfileDTO response = new ProfileDTO();

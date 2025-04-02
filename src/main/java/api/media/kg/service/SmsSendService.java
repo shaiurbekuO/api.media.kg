@@ -41,11 +41,17 @@ public class SmsSendService {
         this.smsProviderHolderRepository = smsProviderHolderRepository;
         this.smsHistoryService = smsHistoryService;
     }
-    public void SendRegistrationSms(String phoneNumber) {
+    public void sendRegistrationSms(String phoneNumber) {
         String code = RandomUtil.getRandomSmsCode();
         String message = "Bu Eskiz dan test";
         message = String.format(message, code);
         sendSms(phoneNumber, message, code, SmsType.REGISTRATION);
+    }
+    public void sendResetPasswordSms(String phoneNumber) {
+        String code = RandomUtil.getRandomSmsCode();
+        String message = "Bu Eskiz dan test";
+        message = String.format(message, code);
+        sendSms(phoneNumber, message, code, SmsType.RESET_PASSWORD);
     }
     private SmsSendResponseDto sendSms(String phoneNumber, String message, String code, SmsType smsType) {
 //*     check sms limit

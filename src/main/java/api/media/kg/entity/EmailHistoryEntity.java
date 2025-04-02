@@ -6,8 +6,8 @@ import jakarta.persistence.*;
 import java.time.LocalDateTime;
 
 @Entity
-@Table(name = "sms_history")
-public class SmsHistoryEntity {
+@Table(name = "email_history")
+public class EmailHistoryEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     private String id;
@@ -49,6 +49,14 @@ public class SmsHistoryEntity {
         this.message = message;
     }
 
+    public String getCode() {
+        return code;
+    }
+
+    public void setCode(String code) {
+        this.code = code;
+    }
+
     public LocalDateTime getCreatedDate() {
         return createdDate;
     }
@@ -63,14 +71,6 @@ public class SmsHistoryEntity {
 
     public void setSmsType(SmsType smsType) {
         this.smsType = smsType;
-    }
-
-    public String getCode() {
-        return code;
-    }
-
-    public void setCode(String code) {
-        this.code = code;
     }
 
     public Integer getAttemptCount() {
