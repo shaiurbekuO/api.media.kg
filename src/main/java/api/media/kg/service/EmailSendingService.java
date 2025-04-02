@@ -10,6 +10,8 @@ import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.stereotype.Service;
 
+import java.util.HashMap;
+import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 
 @Service
@@ -22,39 +24,79 @@ public class EmailSendingService {
         this.javaMailSender = javaMailSender;
     }
     public void sendRegistrationEmail(String email, Long profileId, AppLanguage lang) {
-        String subject = "Каттоону бүтүрүү";
         String token = JwtUtil.encode(profileId);
+
+        // Темаларды (subjects) аныктайбыз
+        Map<AppLanguage, String> subjects = new HashMap<>();
+        subjects.put(AppLanguage.KG, "Каттоону бүтүрүү");
+        subjects.put(AppLanguage.RU, "Завершение регистрации");
+        subjects.put(AppLanguage.EN, "Complete Registration");
+
+        // Саламдашууларды аныктайбыз
+        Map<AppLanguage, String> greetings = new HashMap<>();
+        greetings.put(AppLanguage.KG, "Салам, кандайсыз?");
+        greetings.put(AppLanguage.RU, "Здравствуйте, как Вы?");
+        greetings.put(AppLanguage.EN, "Hello, how are you?");
+
+        // Текстти аныктайбыз
+        Map<AppLanguage, String> messages = new HashMap<>();
+        messages.put(AppLanguage.KG, "Каттоону бүтүрүү үчүн төмөнкү шилтемени басыңыз:");
+        messages.put(AppLanguage.RU, "Нажмите на ссылку ниже, чтобы завершить регистрацию:");
+        messages.put(AppLanguage.EN, "Click the link below to complete registration:");
+
+        // Шилтеме текстин аныктайбыз
+        Map<AppLanguage, String> linkTexts = new HashMap<>();
+        linkTexts.put(AppLanguage.KG, "Бул жерди басыңыз");
+        linkTexts.put(AppLanguage.RU, "Нажмите здесь");
+        linkTexts.put(AppLanguage.EN, "Click here");
+
+        // Тилге жараша текстти тандайбыз
+        String subject = subjects.getOrDefault(lang, subjects.get(AppLanguage.KG));
+        String greeting = greetings.getOrDefault(lang, greetings.get(AppLanguage.KG));
+        String message = messages.getOrDefault(lang, messages.get(AppLanguage.KG));
+        String linkText = linkTexts.getOrDefault(lang, linkTexts.get(AppLanguage.KG));
+
         String body = String.format("<!DOCTYPE html>\n" +
-                "<html lang=\"ky\">\n" +
-                "<head>\n" +
-                "    <meta charset=\"UTF-8\">\n" +
-                "    <title>Каттоону бүтүрүү</title>\n" +
-                "    <style>\n" +
-                "        .link {\n" +
-                "            color: blue; /* көк түс */\n" +
-                "            text-decoration: underline; /* сызык кошуу */\n" +
-                "        }\n" +
-                "\n" +
-                "        .link:hover {\n" +
-                "            color: darkblue; /* үстүнө чыкканда түсү өзгөрөт */\n" +
-                "        }\n" +
-                "    </style>\n" +
-                "</head>\n" +
-                "<body>\n" +
-                "\n" +
-                "<h1 style=\"text-align: center\">Каттоону бүтүрүү</h1>\n" +
-                "<p>Салам, кандайсыз?</p>\n" +
-                "<p>\n" +
-                "    Каттоону бүтүрүү үчүн төмөнкү шилтемени басыңыз: <a class=\"link\"\n" +
-                "                                                           href=\"http://localhost:8080/api/auth/reg-validation/%s?lang=%s\"\n" +
-                "                                                           target=\"_blank\">Бул жерди басыңыз</a>\n" +
-                "</p>\n" +
-                "\n" +
-                "</body>\n" +
-                "</html>", token, lang);
+                        "<html lang=\"%s\">\n" +
+                        "<head>\n" +
+                        "    <meta charset=\"UTF-8\">\n" +
+                        "    <title>%s</title>\n" +
+                        "    <style>\n" +
+                        "        .link {\n" +
+                        "            color: blue;\n" +
+                        "            text-decoration: underline;\n" +
+                        "        }\n" +
+                        "\n" +
+                        "        .link:hover {\n" +
+                        "            color: darkblue;\n" +
+                        "        }\n" +
+                        "    </style>\n" +
+                        "</head>\n" +
+                        "<body>\n" +
+                        "\n" +
+                        "<h1 style=\"text-align: center\">%s</h1>\n" +
+                        "<p>%s</p>\n" +
+                        "<p>\n" +
+                        "    %s <a class=\"link\"\n" +
+                        "           href=\"http://localhost:8080/api/auth/reg-emailVerification/%s?lang=%s\"\n" +
+                        "           target=\"_blank\">%s</a>\n" +
+                        "</p>\n" +
+                        "\n" +
+                        "</body>\n" +
+                        "</html>",
+                lang.toString().toLowerCase(), // html тили
+                subject, // title
+                subject, // h1 тексти
+                greeting, // саламдашуу
+                message, // негизги билдирүү
+                token, // токен
+                lang, // тил параметри
+                linkText // шилтеме тексти
+        );
 
         sendMimeEmail(email, subject, body);
     }
+
     private void sendMimeEmail(String email, String subject, String body) {
         try {
             MimeMessage msg = javaMailSender.createMimeMessage();

@@ -23,6 +23,8 @@ public class SmsHistoryEntity {
     @Column(name = "sms_type")
     @Enumerated(EnumType.STRING)
     private SmsType smsType;
+    @Column(name = "attempt_count")
+    private Integer attemptCount = 0;
 
     public String getId() {
         return id;
@@ -70,5 +72,13 @@ public class SmsHistoryEntity {
 
     public void setCode(String code) {
         this.code = code;
+    }
+
+    public Integer getAttemptCount() {
+        return attemptCount;
+    }
+
+    public void setAttemptCount(Integer attemptCount) {
+        this.attemptCount = attemptCount;
     }
 }

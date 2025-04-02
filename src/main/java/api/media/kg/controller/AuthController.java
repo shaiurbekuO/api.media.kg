@@ -1,30 +1,20 @@
 package api.media.kg.controller;
 
 import api.media.kg.dto.*;
-import api.media.kg.dto.sms.SmsRequestDto;
-import api.media.kg.dto.sms.SmsSendResponseDto;
-import api.media.kg.entity.SmsHistoryEntity;
+import api.media.kg.dto.sms.SmsResendDto;
+import api.media.kg.dto.sms.SmsVerificationDto;
 import api.media.kg.enums.AppLanguage;
-import api.media.kg.enums.SmsType;
-import api.media.kg.exception.BadRequestException;
 import api.media.kg.service.AuthService;
-import api.media.kg.service.SmsSendService;
 import jakarta.validation.Valid;
-import lombok.Getter;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.Random;
 
 @RestController
 @RequestMapping("/api/auth")
 public class AuthController {
-    private final SmsSendService smsSendService;
     private final AuthService authService;
 
-    public AuthController(SmsSendService smsSendService, AuthService authService) {
-        this.smsSendService = smsSendService;
+    public AuthController(AuthService authService) {
         this.authService = authService;
     }
 
@@ -33,10 +23,21 @@ public class AuthController {
                                         @RequestHeader("Accept-Language") AppLanguage lang) {
         return authService.registration(registration, lang);
     }
-    @GetMapping("/reg-validation/{token}")
-    public SimpleResponse emailValidation(@PathVariable("token") String token,
+    @GetMapping("/reg-emailVerification/{token}")
+    public SimpleResponse emailVerification(@Valid @PathVariable("token") String token,
                                           @RequestParam(value = "lang", defaultValue = "KG") AppLanguage lang) {
-        return authService.registrationEmailValidation(token, lang);
+        return authService.registrationEmailVerification(token, lang);
+    }
+    @PostMapping("/reg-smsVerification")
+    public ProfileDTO smsVerification(@Valid @RequestBody SmsVerificationDto dto,
+                                          @RequestParam(value = "lang", defaultValue = "EN") AppLanguage lang) {
+        return authService.registrationSmsVerification(dto, lang);
+    }
+
+    @PostMapping("/reg-smsVerification-resend")
+    public SimpleResponse smsVerificationResend(@Valid @RequestBody SmsResendDto dto,
+                                      @RequestParam(value = "lang", defaultValue = "EN") AppLanguage lang) {
+        return authService.registrationSmsVerificationResend(dto, lang);
     }
     
     @PostMapping("/login")
@@ -44,20 +45,6 @@ public class AuthController {
                                             @RequestHeader("Accept-Language") AppLanguage lang) {
         return ResponseEntity.ok(authService.login(loginDTO, lang));
     }
-
-//    @GetMapping("/token")
-//    public String getToken() {
-//        return smsSendService.getToken();
-//    }
-//
-//    @PostMapping("/send-sms")
-//    public SmsSendResponseDto sendSms(
-//            @Valid @RequestBody SmsRequestDto sendSmsDTO,
-//            @RequestParam SmsType smsType
-//    ) {
-//        String code = generateCode();
-//        return smsSendService.sendSms(sendSmsDTO.getMobile_phone(), sendSmsDTO.getMessage(), code, smsType);
-//    }
 
 
 }

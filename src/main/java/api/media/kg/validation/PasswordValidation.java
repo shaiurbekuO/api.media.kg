@@ -12,7 +12,7 @@ import java.lang.annotation.*;
 @Target({ElementType.METHOD, ElementType.FIELD, ElementType.ANNOTATION_TYPE, ElementType.CONSTRUCTOR, ElementType.PARAMETER, ElementType.TYPE_USE})
 @Retention(RetentionPolicy.RUNTIME)
 public @interface PasswordValidation {
-    String message() default "{Your password must contain at least 8 characters.}";
+    String message() default "{Your password must contain at least 6 characters.}";
 
     Class<?>[] groups() default {};
 

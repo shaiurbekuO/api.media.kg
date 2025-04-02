@@ -6,6 +6,7 @@ import api.media.kg.dto.sms.SmsAuthResponseDto;
 import api.media.kg.dto.sms.SmsRequestDto;
 import api.media.kg.dto.sms.SmsSendResponseDto;
 import api.media.kg.entity.SmsProviderHolderEntity;
+import api.media.kg.enums.AppLanguage;
 import api.media.kg.enums.SmsType;
 import api.media.kg.exception.BadRequestException;
 import api.media.kg.repository.SmsProviderHolderRepository;
@@ -33,7 +34,7 @@ public class SmsSendService {
     private String accountLogin;
     @Value("${eskiz.password}")
     private String accountPassword;
-    private final Integer limit = 1;
+    private final Integer limit = 3;
 
     public SmsSendService(RestTemplate restTemplate, SmsProviderHolderRepository smsProviderHolderRepository, SmsHistoryService smsHistoryService) {
         this.restTemplate = restTemplate;
@@ -42,7 +43,7 @@ public class SmsSendService {
     }
     public void SendRegistrationSms(String phoneNumber) {
         String code = RandomUtil.getRandomSmsCode();
-        String message = "Код: Bu Eskiz dan test, %s";
+        String message = "Bu Eskiz dan test";
         message = String.format(message, code);
         sendSms(phoneNumber, message, code, SmsType.REGISTRATION);
     }

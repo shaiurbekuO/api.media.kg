@@ -9,3 +9,14 @@ Accept-Language: RU
     "password": "admin123"
 }
 
+### Registration
+POST localhost:8080/api/auth/registration
+Content-Type: application/json
+Accept-Language: RU
+
+{
+    "name": "Admin",
+    "username": "774682826",
+    "password": "admin123"
+}
+

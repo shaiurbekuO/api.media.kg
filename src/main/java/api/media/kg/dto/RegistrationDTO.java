@@ -1,6 +1,5 @@
 package api.media.kg.dto;
 
-import api.media.kg.validation.EmailValidation;
 import api.media.kg.validation.PasswordValidation;
 import jakarta.validation.constraints.NotBlank;
 
@@ -8,8 +7,9 @@ import jakarta.validation.constraints.NotBlank;
 public class RegistrationDTO {
     @NotBlank(message = "Name is required")
     private String name;
-    @EmailValidation
+    @NotBlank(message = "Username is required")
     private String username;
+    @NotBlank(message = "Password is required")
     @PasswordValidation
     private String password;
 
