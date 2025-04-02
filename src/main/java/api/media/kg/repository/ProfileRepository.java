@@ -18,4 +18,8 @@ public interface ProfileRepository extends JpaRepository<ProfileEntity, Long> {
     @Modifying
     @Query("update ProfileEntity p set p.status = :status where p.id = :id")
     void changeStatus(Long id, GeneralStatus status);
+
+    @Modifying
+    @Query("update ProfileEntity p set p.password = :encode where p.id = :id")
+    void updatePassword(Long id, String encode);
 }

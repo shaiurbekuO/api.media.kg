@@ -2,6 +2,7 @@ package api.media.kg.service;
 
 import api.media.kg.dto.*;
 import api.media.kg.dto.auth.RegistrationDTO;
+import api.media.kg.dto.auth.ResetPasswordConfirmDTO;
 import api.media.kg.dto.auth.ResetPasswordDTO;
 import api.media.kg.dto.sms.SmsResendDto;
 import api.media.kg.dto.sms.SmsVerificationDto;
@@ -33,11 +34,12 @@ public class AuthService {
     private final SmsSendService smsSendService;
     private final SmsHistoryService smsHistoryService;
     private final EmailSendingService emailSendingService;
+    private final EmailHistoryService emailHistoryService;
 
     public AuthService(ProfileRepository profileRepository, ProfileRoleRepository profileRoleRepository,
                        PasswordEncoder passwordEncoder,
                        ProfileRoleService profileRoleService, ProfileService profileService, ResourceBundleService resourceBundleService, SmsSendService smsSendService,
-                       SmsHistoryService smsHistoryService, EmailSendingService emailSendingService){
+                       SmsHistoryService smsHistoryService, EmailSendingService emailSendingService, EmailHistoryService emailHistoryService){
         this.profileRepository = profileRepository;
         this.profileRoleRepository = profileRoleRepository;
         this.passwordEncoder = passwordEncoder;
@@ -47,6 +49,7 @@ public class AuthService {
         this.smsSendService = smsSendService;
         this.smsHistoryService = smsHistoryService;
         this.emailSendingService = emailSendingService;
+        this.emailHistoryService = emailHistoryService;
     }
 
 
@@ -166,6 +169,25 @@ public class AuthService {
         }
         String response = bundleService.getMessage("reset.password.successful", lang);
         return new SimpleResponse(HttpStatus.OK, String.format(response, dto.getUsername()));
+    }
+    public SimpleResponse resetPasswordConfirm(ResetPasswordConfirmDTO dto, AppLanguage lang) {
+        Optional<ProfileEntity> optional = profileRepository.findByUsernameAndVisibleTrue(dto.getUsername());
+        if (optional.isEmpty()) {
+            throw new BadRequestException(bundleService.getMessage("profile.not.found", lang));
+        }
+        ProfileEntity profile = optional.get();
+        if(!profile.getStatus().equals(GeneralStatus.ACTIVE)){
+            throw new BadRequestException(bundleService.getMessage("account.is.not.active", lang));
+        }
+//  *      check
+        if (EmailUtil.isEmail(dto.getUsername())) {
+            emailHistoryService.check(dto.getUsername(), dto.getConfirmCode(), lang);
+        } else if (PhoneUtil.isPhone(dto.getUsername())) {
+            smsSendService.sendResetPasswordSms(dto.getUsername());
+        }
+//        * update
+        profileRepository.updatePassword(profile.getId(), passwordEncoder.encode(dto.getPassword()));
+        return new SimpleResponse(HttpStatus.OK, bundleService.getMessage("password.successful", lang));
     }
     public ProfileDTO getLogInResponse(ProfileEntity profile) {
         ProfileDTO response = new ProfileDTO();
