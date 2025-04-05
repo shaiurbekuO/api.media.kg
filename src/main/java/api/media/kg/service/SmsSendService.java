@@ -34,8 +34,7 @@ public class SmsSendService {
     private String accountLogin;
     @Value("${eskiz.password}")
     private String accountPassword;
-    @Value("${sms.limit}")
-    private Integer limit;
+    private final Integer limit = 3;
 
     public SmsSendService(RestTemplate restTemplate, SmsProviderHolderRepository smsProviderHolderRepository, SmsHistoryService smsHistoryService) {
         this.restTemplate = restTemplate;
@@ -52,6 +51,11 @@ public class SmsSendService {
         String code = RandomUtil.getRandomSmsCode();
         String message = "Bu Eskiz dan test";
         sendSms(phoneNumber, message, code, SmsType.RESET_PASSWORD);
+    }
+    public void sendChangeUsernameConfirmSms(String phoneNumber, AppLanguage lang) {
+        String code = RandomUtil.getRandomSmsCode();
+        String message = "Bu Eskiz dan test";
+        sendSms(phoneNumber, message, code, SmsType.CHANGE_USERNAME_CONFIRM);
     }
     private SmsSendResponseDto sendSms(String phoneNumber, String message, String code, SmsType smsType) {
 //*     check sms limit

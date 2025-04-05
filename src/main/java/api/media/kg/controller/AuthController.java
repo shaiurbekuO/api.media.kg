@@ -33,13 +33,13 @@ public class AuthController {
     }
     @PostMapping("/reg-smsVerification")
     public ProfileDTO smsVerification(@Valid @RequestBody SmsVerificationDto dto,
-                                          @RequestParam(value = "lang", defaultValue = "EN") AppLanguage lang) {
+                                          @RequestHeader(value = "Accept-Language", defaultValue = "EN") AppLanguage lang) {
         return authService.registrationSmsVerification(dto, lang);
     }
 
     @PostMapping("/reg-smsVerification-resend")
     public SimpleResponse smsVerificationResend(@Valid @RequestBody SmsResendDto dto,
-                                      @RequestParam(value = "lang", defaultValue = "EN") AppLanguage lang) {
+                                      @RequestHeader(value = "Accept-Language", defaultValue = "EN") AppLanguage lang) {
         return authService.registrationSmsVerificationResend(dto, lang);
     }
     

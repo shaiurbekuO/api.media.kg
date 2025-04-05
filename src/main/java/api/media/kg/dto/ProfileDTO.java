@@ -9,6 +9,7 @@ public class ProfileDTO {
     private String username;
     private List<ProfileRole> roleList;
     private String jwt;
+    private AttachDTO photo;
 
     public String getName() {
         return name;
@@ -40,5 +41,13 @@ public class ProfileDTO {
 
     public void setJwt(String jwt) {
         this.jwt = jwt;
+    }
+
+    public AttachDTO getPhoto() {
+        return photo;
+    }
+
+    public void setPhoto(AttachDTO photo) {
+        this.photo = photo;
     }
 }
