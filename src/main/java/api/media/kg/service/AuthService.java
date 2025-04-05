@@ -35,11 +35,12 @@ public class AuthService {
     private final SmsHistoryService smsHistoryService;
     private final EmailSendingService emailSendingService;
     private final EmailHistoryService emailHistoryService;
+    private final AttachService attachService;
 
     public AuthService(ProfileRepository profileRepository, ProfileRoleRepository profileRoleRepository,
                        PasswordEncoder passwordEncoder,
                        ProfileRoleService profileRoleService, ProfileService profileService, ResourceBundleService resourceBundleService, SmsSendService smsSendService,
-                       SmsHistoryService smsHistoryService, EmailSendingService emailSendingService, EmailHistoryService emailHistoryService){
+                       SmsHistoryService smsHistoryService, EmailSendingService emailSendingService, EmailHistoryService emailHistoryService, AttachService attachService){
         this.profileRepository = profileRepository;
         this.profileRoleRepository = profileRoleRepository;
         this.passwordEncoder = passwordEncoder;
@@ -50,6 +51,7 @@ public class AuthService {
         this.smsHistoryService = smsHistoryService;
         this.emailSendingService = emailSendingService;
         this.emailHistoryService = emailHistoryService;
+        this.attachService = attachService;
     }
 
 
@@ -183,7 +185,7 @@ public class AuthService {
         if (EmailUtil.isEmail(dto.getUsername())) {
             emailHistoryService.check(dto.getUsername(), dto.getConfirmCode(), lang);
         } else if (PhoneUtil.isPhone(dto.getUsername())) {
-            smsSendService.sendResetPasswordSms(dto.getUsername());
+            smsHistoryService.check(dto.getUsername(), dto.getConfirmCode(), lang);
         }
 //        * update
         profileRepository.updatePassword(profile.getId(), passwordEncoder.encode(dto.getPassword()));
@@ -195,6 +197,7 @@ public class AuthService {
         response.setUsername(profile.getUsername());
         response.setRoleList(profileRoleRepository.getAllRolesListByProfile(profile.getId()));
         response.setJwt(JwtUtil.encode(profile.getUsername(), profile.getId(), response.getRoleList()));
+        response.setPhoto(attachService.attachDTO(profile.getPhotoId()));
         return response;
     }
 

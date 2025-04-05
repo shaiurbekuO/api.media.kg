@@ -23,9 +23,7 @@ public class EmailSendingService {
     private String fromAccount;
     private final JavaMailSender javaMailSender;
     private final EmailHistoryService emailHistoryService;
-    @Value("${sms.limit}")
-    private Integer limit;
-
+    private final Integer limit = 3;
 
     public EmailSendingService(JavaMailSender javaMailSender, EmailHistoryService emailHistoryService) {
         this.javaMailSender = javaMailSender;
@@ -170,14 +168,83 @@ public class EmailSendingService {
         );
         checkAndSendMimeEmail(email, subject, body, code);
     }
+    public void sendChangeUsernameEmail(String email, AppLanguage lang) {
+        String code = RandomUtil.getRandomSmsCode();
+        // Темаларды (subjects) аныктайбыз
+        Map<AppLanguage, String> subjects = new HashMap<>();
+        subjects.put(AppLanguage.KG, "Сырсөздү ырастоо");
+        subjects.put(AppLanguage.RU, "Подтверждение сброса пароля");
+        subjects.put(AppLanguage.EN, "Username Change Confirmation");
+
+        // Саламдашууларды аныктайбыз
+        Map<AppLanguage, String> greetings = new HashMap<>();
+        greetings.put(AppLanguage.KG, "Салам, кандайсыз?");
+        greetings.put(AppLanguage.RU, "Здравствуйте, как Вы?");
+        greetings.put(AppLanguage.EN, "Hello, how are you?");
+
+        // Текстти аныктайбыз
+        Map<AppLanguage, String> messages = new HashMap<>();
+        messages.put(AppLanguage.KG, "Сырсөздү ырастоо үчүн төмөнкү код колдонуңуз: %s");
+        messages.put(AppLanguage.RU, "Используйте следующий код для подтверждения сброса пароля: %s");
+        messages.put(AppLanguage.EN, "Use the following code to confirm your password reset: %s");
+
+        // Шилтеме текстин аныктайбыз
+        Map<AppLanguage, String> linkTexts = new HashMap<>();
+        linkTexts.put(AppLanguage.KG, "Колдонуучунун атын өзгөртүү ырастоо");
+        linkTexts.put(AppLanguage.RU, "Подтверждение изменения имени пользователя");
+        linkTexts.put(AppLanguage.EN, "Username Change Confirmation");
+
+        // Тилге жараша текстти тандайбыз
+        String subject = subjects.getOrDefault(lang, subjects.get(AppLanguage.KG));
+        String greeting = greetings.getOrDefault(lang, greetings.get(AppLanguage.KG));
+        String messageTemplate = messages.getOrDefault(lang, messages.get(AppLanguage.KG));
+        String message = String.format(messageTemplate, code);
+
+        String body = String.format("<!DOCTYPE html>\n" +
+                        "<html lang=\"%s\">\n" +
+                        "<head>\n" +
+                        "    <meta charset=\"UTF-8\">\n" +
+                        "    <title>%s</title>\n" +
+                        "    <style>\n" +
+                        "        .code {\n" +
+                        "            font-size: 24px;\n" +
+                        "            font-weight: bold;\n" +
+                        "            background-color: #f0f0f0;\n" +
+                        "            padding: 10px;\n" +
+                        "            border-radius: 5px;\n" +
+                        "            margin: 10px 0;\n" +
+                        "            display: inline-block;\n" +
+                        "        }\n" +
+                        "    </style>\n" +
+                        "</head>\n" +
+                        "<body>\n" +
+                        "\n" +
+                        "<h1 style=\"text-align: center\">%s</h1>\n" +
+                        "<p>%s</p>\n" +
+                        "<p>%s</p>\n" +
+                        "<p class=\"code\">%s</p>\n" +
+                        "\n" +
+                        "</body>\n" +
+                        "</html>",
+                lang.toString().toLowerCase(), // html тили
+                subject, // title
+                subject, // h1 тексти
+                greeting, // саламдашуу
+                message, // негизги билдирүү (кодду камтыйт)
+                code     // кодду өзүнчө көрсөтүү
+        );
+        checkAndSendMimeEmail(email, subject, body, code);
+    }
     private void checkAndSendMimeEmail(String email, String subject, String body, String code) {
         //        *check
         Long count = emailHistoryService.getEmailCount(email);
-        if(count >= limit) throw new BadRequestException("Email limit reached");
+        if(count >= limit) {
+            throw new BadRequestException("Email limit reached");
+        }
         //        * send
         sendMimeEmail(email, subject, body);
         //        * create
-        emailHistoryService.create(email, code, SmsType.RESET_PASSWORD);
+        emailHistoryService.create(email, code, SmsType.CHANGE_USERNAME_CONFIRM);
     }
 
     private void sendMimeEmail(String email, String subject, String body) {

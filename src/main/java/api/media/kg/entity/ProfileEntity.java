@@ -18,6 +18,8 @@ public class ProfileEntity {
     private String name;
     @Column(name = "username")
     private String username; //* email/phone
+    @Column(name = "temp_username")
+    private String tempUsername;
     @Column(name = "password")
     private String password;
     @Column(name = "status")
@@ -28,9 +30,12 @@ public class ProfileEntity {
 
     @Column(name = "created_date")
     private LocalDate createdDate;
-//    @Column(name = "lang")
-//    @Enumerated(EnumType.STRING)
-//    private AppLanguage lang;
+    @Column(name = "photo_id")
+    private String photoId;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "photo_id", insertable = false, updatable = false)
+    private AttachEntity photo;
 
     public ProfileEntity() {
     }
@@ -57,6 +62,14 @@ public class ProfileEntity {
 
     public void setUsername(String username) {
         this.username = username;
+    }
+
+    public String getTempUsername() {
+        return tempUsername;
+    }
+
+    public void setTempUsername(String tempUsername) {
+        this.tempUsername = tempUsername;
     }
 
     public String getPassword() {
@@ -89,5 +102,21 @@ public class ProfileEntity {
 
     public void setCreatedDate(LocalDate createdDate) {
         this.createdDate = createdDate;
+    }
+
+    public String getPhotoId() {
+        return photoId;
+    }
+
+    public void setPhotoId(String photoId) {
+        this.photoId = photoId;
+    }
+
+    public AttachEntity getPhoto() {
+        return photo;
+    }
+
+    public void setPhoto(AttachEntity photo) {
+        this.photo = photo;
     }
 }
