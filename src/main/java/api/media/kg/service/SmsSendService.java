@@ -11,6 +11,7 @@ import api.media.kg.enums.SmsType;
 import api.media.kg.exception.BadRequestException;
 import api.media.kg.repository.SmsProviderHolderRepository;
 import api.media.kg.util.RandomUtil;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
@@ -24,6 +25,7 @@ import java.util.Optional;
 
 
 @Service
+@Slf4j
 public class SmsSendService {
     private final RestTemplate restTemplate;
     private final SmsProviderHolderRepository smsProviderHolderRepository;
@@ -60,6 +62,7 @@ public class SmsSendService {
     private SmsSendResponseDto sendSms(String phoneNumber, String message, String code, SmsType smsType) {
 //*     check sms limit
         Long count = smsHistoryService.getSmsCount(phoneNumber);
+        log.info("Sms limit reached: {}", count);
         if(count >= limit) throw new BadRequestException("Sms limit reached");
 //*     send
         SmsSendResponseDto result = sendSms(phoneNumber, message);
@@ -93,9 +96,11 @@ public class SmsSendService {
             if (response.getStatusCode().is2xxSuccessful()) {
                 return response.getBody();
             } else {
+                log.error("Серверден ката келди: phoneNumber: " + phoneNumber + " message: " + message );
                 throw new BadRequestException("Серверден ката келди: " + response.getBody());
             }
         } catch (RuntimeException e) {
+            log.error("СМС жөнөтүү убагында ката кетти: phoneNumber: " + phoneNumber + " message: " + message);
             throw new BadRequestException("СМС жөнөтүү убагында ката кетти: " + e.getMessage());
         }
     }
@@ -133,6 +138,7 @@ public class SmsSendService {
            SmsAuthResponseDto responseDto = restTemplate.postForObject(smsURL+"/auth/login",smsAuthDto, SmsAuthResponseDto.class);
            return responseDto.getData().getToken();
        }catch (Exception e){
+           log.error("Get token account error: {}", e.getMessage());
            throw new RuntimeException(e);
        }
 

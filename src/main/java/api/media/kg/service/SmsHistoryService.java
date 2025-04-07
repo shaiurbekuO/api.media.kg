@@ -5,12 +5,14 @@ import api.media.kg.enums.AppLanguage;
 import api.media.kg.enums.SmsType;
 import api.media.kg.exception.BadRequestException;
 import api.media.kg.repository.SmsHistoryRepository;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 import java.util.Optional;
 
 @Service
+@Slf4j
 public class SmsHistoryService {
     private final SmsHistoryRepository smsHistoryRepository;
     private final ResourceBundleService bundleService;
@@ -46,6 +48,7 @@ public class SmsHistoryService {
         SmsHistoryEntity entity = optional.get();
 //        * attempt Count check
         if(entity.getAttemptCount() >= 3) {
+            log.warn("Attempt count exceeded limit {}", phoneNumber);
             throw new BadRequestException(bundleService.getMessage("attempt.count.exceeded.limit", lang));
         }
         //* 2. Проверяем совпадение кода
@@ -57,6 +60,7 @@ public class SmsHistoryService {
         //* 3. Проверяем время действия кода
         LocalDateTime expDate = entity.getCreatedDate().plusMinutes(2);
         if(LocalDateTime.now().isAfter(expDate)) {
+            log.warn("Sms expired    {}", phoneNumber);
             throw new BadRequestException(bundleService.getMessage("code.expired", lang));
         }
         return true;

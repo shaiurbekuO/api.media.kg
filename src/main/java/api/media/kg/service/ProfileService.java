@@ -15,6 +15,8 @@ import api.media.kg.util.EmailUtil;
 import api.media.kg.util.JwtUtil;
 import api.media.kg.util.PhoneUtil;
 import api.media.kg.util.SpringSecurityUtil;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -23,6 +25,8 @@ import java.util.List;
 import java.util.Optional;
 
 @Service
+@RequiredArgsConstructor
+@Slf4j
 public class ProfileService {
     private final ProfileRepository profileRepository;
     private final ResourceBundleService bundleService;
@@ -31,25 +35,12 @@ public class ProfileService {
     private final SmsSendService smsSendService;
     private final SmsHistoryService smsHistoryService;
     private final EmailHistoryService emailHistoryService;
-    private final ProfileRoleService profileRoleService;
     private final ProfileRoleRepository profileRoleRepository;
     private final AttachService attachService;
 
 
-    public ProfileService(ProfileRepository profileRepository, ResourceBundleService bundleService, PasswordEncoder passwordEncoder, EmailSendingService emailSendingService, SmsSendService smsSendService, SmsHistoryService smsHistoryService, EmailHistoryService emailHistoryService, ProfileRoleService profileRoleService, ProfileRoleRepository profileRoleRepository, AttachService attachService) {
-        this.profileRepository = profileRepository;
-        this.bundleService = bundleService;
-        this.passwordEncoder = passwordEncoder;
-        this.emailSendingService = emailSendingService;
-        this.smsSendService = smsSendService;
-        this.smsHistoryService = smsHistoryService;
-        this.emailHistoryService = emailHistoryService;
-        this.profileRoleService = profileRoleService;
-        this.profileRoleRepository = profileRoleRepository;
-        this.attachService = attachService;
-    }
-
     public ProfileEntity getProfileId(Long id) {
+        log.error("Profile not found id: {}", id);
         return profileRepository.findById(id).orElseThrow(() -> new RuntimeException("Profile not found"));
     }
 
@@ -63,6 +54,7 @@ public class ProfileService {
         Long profileId = SpringSecurityUtil.getCurrentUserId();
         ProfileEntity profile = getProfileId(profileId);
         if (!passwordEncoder.matches(dto.getOldPassword(), profile.getPassword())) {
+            log.warn("Old password incorrect {}", dto.getOldPassword());
             throw new BadRequestException(bundleService.getMessage("old.password.incorrect", lang));
         }
         profileRepository.updatePassword(profileId, passwordEncoder.encode(dto.getNewPassword()));
@@ -72,6 +64,7 @@ public class ProfileService {
 //        * check
         Optional<ProfileEntity> optional = profileRepository.findByUsernameAndVisibleTrue(dto.getUsername());
         if(optional.isPresent() && optional.get() != null){
+            log.warn("Email or phone already exists {}", dto.getUsername());
             throw new BadRequestException(bundleService.getMessage("email.phone.exists", lang));
         }
         //        * save
@@ -113,6 +106,7 @@ public class ProfileService {
         ProfileEntity profile = getProfileId(profileId);
 
         if (profile.getPhotoId() != null && !profile.getPhotoId().equals(photoId)) {
+            log.info("Delete old photo {}", profile.getPhotoId());
             attachService.delete(profile.getPhotoId());
         }
         profileRepository.updatePhoto(profileId, photoId);
