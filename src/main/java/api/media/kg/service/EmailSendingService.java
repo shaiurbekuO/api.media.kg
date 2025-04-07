@@ -7,6 +7,7 @@ import api.media.kg.util.JwtUtil;
 import api.media.kg.util.RandomUtil;
 import jakarta.mail.MessagingException;
 import jakarta.mail.internet.MimeMessage;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
@@ -18,6 +19,7 @@ import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 
 @Service
+@Slf4j
 public class EmailSendingService {
     @Value("${spring.mail.username}")
     private String fromAccount;
@@ -239,6 +241,7 @@ public class EmailSendingService {
         //        *check
         Long count = emailHistoryService.getEmailCount(email);
         if(count >= limit) {
+            log.info("Email limit reached: {}", count);
             throw new BadRequestException("Email limit reached");
         }
         //        * send
@@ -259,6 +262,7 @@ public class EmailSendingService {
                 javaMailSender.send(msg);
             });
         } catch (MessagingException e) {
+            log.error("Email sending failed: {}", email);
             throw new RuntimeException("Email sending failed", e);
         }
     }

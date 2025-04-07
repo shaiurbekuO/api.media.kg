@@ -2,6 +2,8 @@ package api.media.kg.dto.profile;
 
 import jakarta.validation.constraints.NotBlank;
 
+
+
 public class ProfileDetailUpdateDTO {
     @NotBlank(message = "Name is required")
     private String name;

@@ -24,4 +24,10 @@ public class SmsVerificationDto {
     public void setCode(String code) {
         this.code = code;
     }
+
+    @Override
+    public String toString() {
+        return "SmsVerificationDto" +
+                "phone:" + phone +", cod:" + code;
+    }
 }
