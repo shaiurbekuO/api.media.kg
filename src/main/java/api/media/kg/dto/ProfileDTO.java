@@ -1,53 +1,26 @@
 package api.media.kg.dto;
 
+import api.media.kg.enums.GeneralStatus;
 import api.media.kg.enums.ProfileRole;
+import com.fasterxml.jackson.annotation.JsonInclude;
+import lombok.Getter;
+import lombok.Setter;
 
+import java.time.LocalDateTime;
 import java.util.List;
-
+@Getter
+@Setter
+@JsonInclude(JsonInclude.Include.NON_NULL)
 public class ProfileDTO {
+    private Long id;
     private String name;
     private String username;
     private List<ProfileRole> roleList;
     private String jwt;
     private AttachDTO photo;
+    private GeneralStatus status;
+    private LocalDateTime createdDate;
+    private Long postCount;
 
-    public String getName() {
-        return name;
-    }
 
-    public void setName(String name) {
-        this.name = name;
-    }
-
-    public String getUsername() {
-        return username;
-    }
-
-    public void setUsername(String username) {
-        this.username = username;
-    }
-
-    public List<ProfileRole> getRoleList() {
-        return roleList;
-    }
-
-    public void setRoleList(List<ProfileRole> roleList) {
-        this.roleList = roleList;
-    }
-
-    public String getJwt() {
-        return jwt;
-    }
-
-    public void setJwt(String jwt) {
-        this.jwt = jwt;
-    }
-
-    public AttachDTO getPhoto() {
-        return photo;
-    }
-
-    public void setPhoto(AttachDTO photo) {
-        this.photo = photo;
-    }
 }

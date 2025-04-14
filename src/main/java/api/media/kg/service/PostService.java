@@ -2,31 +2,33 @@ package api.media.kg.service;
 
 import api.media.kg.dto.FilterResultDTO;
 import api.media.kg.dto.ProfileDTO;
-import api.media.kg.dto.post.PostCreateDTO;
-import api.media.kg.dto.post.PostDTO;
-import api.media.kg.dto.post.PostFilterDTO;
+import api.media.kg.dto.SimpleResponse;
+import api.media.kg.dto.post.*;
 import api.media.kg.entity.PostEntity;
+import api.media.kg.enums.AppLanguage;
 import api.media.kg.enums.ProfileRole;
 import api.media.kg.exception.BadRequestException;
-import api.media.kg.repository.CustomRepository;
+import api.media.kg.repository.CustomPostRepository;
 import api.media.kg.repository.PostRepository;
 import api.media.kg.util.SpringSecurityUtil;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
-import java.awt.print.Pageable;
 import java.time.LocalDateTime;
 import java.util.List;
+
 
 @Service
 @RequiredArgsConstructor
 public class PostService {
     private final PostRepository postRepository;
     private final AttachService attachService;
-    private final CustomRepository customRepository;
+    private final CustomPostRepository customRepository;
+    private final ResourceBundleService bundleService;
 
     public PostDTO create(PostCreateDTO dto){
         PostEntity entity = new PostEntity();
@@ -39,17 +41,20 @@ public class PostService {
         postRepository.save(entity);
         return toInfoDto(entity);
     }
-    public List<PostDTO> getProfilePosts(){
+    public Page<PostDTO> getProfilePosts(int page, int size){
+        PageRequest pageRequest = PageRequest.of(page, size);
         Long profileId = SpringSecurityUtil.getCurrentUserId();
-        List<PostEntity> entities = postRepository.getAllByProfileAndVisibleTrue(profileId);
-        return entities.stream().map(this::toInfoDto).toList();
+        Page<PostEntity> result = postRepository.getAllByProfileAndVisibleTrueOrderByCreatedDateDesc(profileId, pageRequest);
+        List<PostDTO> list = result.getContent().stream().map(this::toInfoDto).toList();
+        result.getTotalElements();
+        return new PageImpl<>(list, pageRequest, result.getTotalElements());
     }
     public PostDTO getById(String id){
            PostEntity entity = findById(id);
            return toDto(entity);
     }
 
-    public PostDTO update(String id, PostCreateDTO dto){
+    public SimpleResponse update(String id, PostCreateDTO dto, AppLanguage lang){
         PostEntity entity = findById(id);
         Long profileId = SpringSecurityUtil.getCurrentUserId();
         if(!SpringSecurityUtil.hasRole(ProfileRole.ROLE_ADMIN) && !entity.getProfileId().equals(profileId)){
@@ -67,17 +72,17 @@ public class PostService {
         if (deletePhotoId != null){
             attachService.delete(deletePhotoId);
         }
-        return toInfoDto(entity);
+        return new SimpleResponse(HttpStatus.OK, bundleService.getMessage("post.update.successful", lang));
     }
 
-    public Boolean delete(String id){
+    public SimpleResponse delete(String id, AppLanguage lang){
         PostEntity entity = findById(id);
         Long profileId = SpringSecurityUtil.getCurrentUserId();
         if(!SpringSecurityUtil.hasRole(ProfileRole.ROLE_ADMIN) && !entity.getProfileId().equals(profileId)){
             throw new BadRequestException("You don't have permission to delete this post");
         }
         postRepository.delete(id);
-        return true;
+        return new SimpleResponse(HttpStatus.OK, bundleService.getMessage("post.delete.successful", lang));
     }
 
     public Page<PostDTO> filter(PostFilterDTO dto, int page, int size){
@@ -108,5 +113,37 @@ public class PostService {
     public PostEntity findById(String id){
         return postRepository.findById(id).orElseThrow(() -> new BadRequestException("Post not found "));
     }
+
+    public List<PostDTO> getSimilarPostList(SimilarPostListDTO dto) {
+        List<PostEntity> list = postRepository.getSimilarPostList(dto.getExceptId());
+        return list.stream().map(this::toInfoDto).toList();
+    }
+
+
+    public Page<PostDTO> adminFilter(PostAdminFilterDTO dto, int page, int size) {
+        FilterResultDTO<Object[]> resultDTO = customRepository.filter(dto, page, size);
+        List<PostDTO> dtoList = resultDTO.getList().stream()
+                .map(this::toDto).toList();
+        return new PageImpl<>(dtoList, PageRequest.of(page, size), resultDTO.getCount());
+    }
+
+
+
+    public PostDTO toDto(Object[] obj) {
+        PostDTO post = new PostDTO();
+        post.setId((String) obj[0]); // ID
+        post.setTitle((String) obj[1]); // Title
+        if (obj[2] != null) {
+            post.setPhoto(attachService.attachDTO((String) obj[2])); // Photo
+        }
+        post.setCreatedDate((LocalDateTime) obj[3]); // CreatedDate
+        ProfileDTO profile = new ProfileDTO();
+        profile.setId((Long) obj[4]); // Profile ID
+        profile.setName((String) obj[5]); // Profile Name
+        profile.setUsername((String) obj[6]); // Profile Username
+        post.setProfile(profile);
+        return post;
+    }
+
 
 }

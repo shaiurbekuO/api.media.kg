@@ -1,14 +1,13 @@
 package api.media.kg.dto.post;
 
 import api.media.kg.dto.AttachDTO;
+import api.media.kg.dto.ProfileDTO;
 import com.fasterxml.jackson.annotation.JsonInclude;
-import lombok.Getter;
-import lombok.Setter;
+import lombok.Data;
+;
 
 import java.time.LocalDateTime;
-
-@Getter
-@Setter
+@Data
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class PostDTO {
     private String id;
@@ -17,5 +16,6 @@ public class PostDTO {
     private AttachDTO photo;
     private LocalDateTime createdDate = LocalDateTime.now();
     private Boolean visible;
+    private ProfileDTO profile;
 
 }

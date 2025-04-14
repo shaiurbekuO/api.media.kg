@@ -2,25 +2,33 @@ package api.media.kg.repository;
 
 import api.media.kg.entity.PostEntity;
 import jakarta.transaction.Transactional;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.PagingAndSortingRepository;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
-
 import java.util.List;
 
+
 @Repository
-public interface PostRepository extends JpaRepository<PostEntity, String> {
-    @Modifying
+public interface PostRepository extends JpaRepository<PostEntity, String>, PagingAndSortingRepository<PostEntity, String> {
     @Transactional
-    @Query("select p from PostEntity p where p.profile.id = :profileId and p.visible = true")
-    List<PostEntity> getAllByProfileAndVisibleTrue(Long profileId);
+    @Query("select p from PostEntity p where p.profile.id = :profileId and p.visible = true order by p.createdDate desc")
+    Page<PostEntity> getAllByProfileAndVisibleTrueOrderByCreatedDateDesc(Long profileId, Pageable pageable);
+
+    @Transactional
+    @Query("select p from PostEntity p where p.id != :exceptId and p.visible = true order by p.createdDate desc limit 3")
+    List<PostEntity> getSimilarPostList(String exceptId);
+
 
     @Modifying
     @Transactional
     @Query("UPDATE PostEntity p SET p.title = :#{#entity.title}, p.content = :#{#entity.content}, p.photoId = :#{#entity.photoId} WHERE p.id = :#{#entity.id}")
     void update(@Param("entity") PostEntity entity);
+
     @Modifying
     @Transactional
     @Query("update PostEntity p set p.visible = false where p.id = :id")

@@ -1,12 +1,10 @@
-package api.media.kg.dto.post;
+package api.media.kg.dto.profile;
 
 import lombok.Getter;
 import lombok.Setter;
 
 @Getter
 @Setter
-public class PostFilterDTO {
+public class ProfileFilterDTO {
     private String query;
-    private String exceptId;
-
 }
