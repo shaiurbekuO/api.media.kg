@@ -2,14 +2,21 @@ package api.media.kg.entity;
 
 import api.media.kg.enums.AppLanguage;
 import api.media.kg.enums.GeneralStatus;
+import api.media.kg.enums.ProfileRole;
 import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.util.List;
 
 @Entity
 @Table(name = "profile")
+@Getter
+@Setter
 public class ProfileEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -29,7 +36,7 @@ public class ProfileEntity {
     private Boolean visible=Boolean.TRUE;
 
     @Column(name = "created_date")
-    private LocalDate createdDate;
+    private LocalDateTime createdDate;
     @Column(name = "photo_id")
     private String photoId;
 
@@ -37,86 +44,9 @@ public class ProfileEntity {
     @JoinColumn(name = "photo_id", insertable = false, updatable = false)
     private AttachEntity photo;
 
-    public ProfileEntity() {
-    }
+    @OneToMany(mappedBy = "profile",fetch = FetchType.LAZY)
+    private List<ProfileRoleEntity> roleList;
 
-    public Long getId() {
-        return id;
-    }
 
-    public void setId(Long id) {
-        this.id = id;
-    }
 
-    public String getName() {
-        return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
-    }
-
-    public String getUsername() {
-        return username;
-    }
-
-    public void setUsername(String username) {
-        this.username = username;
-    }
-
-    public String getTempUsername() {
-        return tempUsername;
-    }
-
-    public void setTempUsername(String tempUsername) {
-        this.tempUsername = tempUsername;
-    }
-
-    public String getPassword() {
-        return password;
-    }
-
-    public void setPassword(String password) {
-        this.password = password;
-    }
-
-    public GeneralStatus getStatus() {
-        return status;
-    }
-
-    public void setStatus(GeneralStatus status) {
-        this.status = status;
-    }
-
-    public Boolean getVisible() {
-        return visible;
-    }
-
-    public void setVisible(Boolean visible) {
-        this.visible = visible;
-    }
-
-    public LocalDate getCreatedDate() {
-        return createdDate;
-    }
-
-    public void setCreatedDate(LocalDate createdDate) {
-        this.createdDate = createdDate;
-    }
-
-    public String getPhotoId() {
-        return photoId;
-    }
-
-    public void setPhotoId(String photoId) {
-        this.photoId = photoId;
-    }
-
-    public AttachEntity getPhoto() {
-        return photo;
-    }
-
-    public void setPhoto(AttachEntity photo) {
-        this.photo = photo;
-    }
 }

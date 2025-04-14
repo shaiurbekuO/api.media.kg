@@ -21,6 +21,7 @@ public class SimpleResponse {
         this.data = data;
     }
 
+
     public HttpStatus getStatus() {
         return status;
     }

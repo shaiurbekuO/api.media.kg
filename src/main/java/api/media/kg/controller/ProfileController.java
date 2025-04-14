@@ -1,21 +1,25 @@
 package api.media.kg.controller;
 
 import api.media.kg.dto.CodeConfirmDTO;
+import api.media.kg.dto.ProfileDTO;
 import api.media.kg.dto.SimpleResponse;
-import api.media.kg.dto.profile.ProfileDetailUpdateDTO;
-import api.media.kg.dto.profile.ProfilePhotoUpdateDTO;
-import api.media.kg.dto.profile.ProfileUpdatePasswordDTO;
-import api.media.kg.dto.profile.ProfileUpdateUsernameDTO;
+import api.media.kg.dto.profile.*;
 import api.media.kg.enums.AppLanguage;
 import api.media.kg.service.ProfileService;
+import api.media.kg.util.PageUtil;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/profile")
 @Tag(name = "Profile Management", description = "API for managing user profile information")
+@Slf4j
 public class ProfileController {
     private final ProfileService profileService;
 
@@ -59,4 +63,35 @@ public class ProfileController {
                                          @RequestHeader(value = "Accept-Language", defaultValue = "EN") AppLanguage lang) {
         return profileService.updateUsernameConfirm(dto, lang);
     }
+
+    @Operation(summary = "Profile filter",
+            description = "Api used for profile filter")
+    @PostMapping("/filter")
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
+    public ResponseEntity<Page<ProfileDTO>> profileFilter(@RequestBody ProfileFilterDTO dto,
+                                                         @RequestHeader(value = "Accept-Language", defaultValue = "EN") AppLanguage lang,
+                                                         @RequestParam(value = "page", defaultValue = "1") int page,
+                                                         @RequestParam(value = "size", defaultValue = "10") int size){
+        return ResponseEntity.ok(profileService.profileFilter(dto, PageUtil.getPage(page), size, lang));
+    }
+
+    @Operation(summary = "Profile status",
+            description = "Api used for Profile check status")
+    @PutMapping("/status/{id}")
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
+    public ResponseEntity<SimpleResponse> status(@PathVariable("id") Long id,
+                                                 @Valid @RequestBody ProfileStatusDTO dto,
+                                                 @RequestHeader(value = "Accept-Language", defaultValue = "EN") AppLanguage lang){
+        return ResponseEntity.ok(profileService.changeStatus(id,dto.getStatus(), lang));
+    }
+
+    @Operation(summary = "Profile delete",
+            description = "Api used for Profile delete")
+    @DeleteMapping("/{id}")
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
+    public ResponseEntity<SimpleResponse> delete(@PathVariable("id") Long id,
+                                                 @RequestHeader(value = "Accept-Language", defaultValue = "EN") AppLanguage lang){
+        return ResponseEntity.ok(profileService.delete(id, lang));
+    }
+
 }

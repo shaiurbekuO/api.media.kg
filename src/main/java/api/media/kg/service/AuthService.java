@@ -64,7 +64,7 @@ public class AuthService {
         newProfile.setUsername(registrationDTO.getUsername());
         newProfile.setPassword(passwordEncoder.encode(registrationDTO.getPassword()));
         newProfile.setStatus(GeneralStatus.IN_REGISTRATION);
-        newProfile.setCreatedDate(java.time.LocalDate.now());
+        newProfile.setCreatedDate(java.time.LocalDateTime.now());
         newProfile.setVisible(true);
         profileRepository.save(newProfile);
 

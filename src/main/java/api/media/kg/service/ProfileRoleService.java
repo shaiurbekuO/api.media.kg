@@ -19,7 +19,7 @@ public class ProfileRoleService {
         ProfileRoleEntity entity = new ProfileRoleEntity();
         entity.setProfileId(profileId);
         entity.setRoles(role);
-        entity.setCreatedDate(java.time.LocalDate.now());
+        entity.setCreatedDate(java.time.LocalDateTime.now());
         profileRoleRepository.save(entity);
         return new SimpleResponse(HttpStatus.OK,"Profile role success");
 
