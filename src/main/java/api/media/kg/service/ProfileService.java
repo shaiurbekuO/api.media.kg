@@ -7,13 +7,16 @@ import api.media.kg.dto.profile.ProfileDetailUpdateDTO;
 import api.media.kg.dto.profile.ProfileFilterDTO;
 import api.media.kg.dto.profile.ProfileUpdatePasswordDTO;
 import api.media.kg.dto.profile.ProfileUpdateUsernameDTO;
+import api.media.kg.entity.PostEntity;
 import api.media.kg.entity.ProfileEntity;
 import api.media.kg.entity.ProfileRoleEntity;
 import api.media.kg.enums.AppLanguage;
 import api.media.kg.enums.GeneralStatus;
 import api.media.kg.enums.ProfileRole;
 import api.media.kg.exception.BadRequestException;
+import api.media.kg.exception.NotFoundException;
 import api.media.kg.mapper.ProfileDetailMapper;
+import api.media.kg.repository.PostRepository;
 import api.media.kg.repository.ProfileRepository;
 import api.media.kg.repository.ProfileRoleRepository;
 import api.media.kg.util.EmailUtil;
@@ -48,12 +51,17 @@ public class ProfileService {
     private final EmailHistoryService emailHistoryService;
     private final ProfileRoleRepository profileRoleRepository;
     private final AttachService attachService;
+    private final PostRepository postRepository;
 
 
     public ProfileEntity getProfileId(Long id) {
         log.error("Profile not found id: {}", id);
         return profileRepository.findById(id).orElseThrow(() -> new RuntimeException("Profile not found"));
     }
+    public PostEntity getPostId(String id) {
+        return postRepository.findById(id).orElseThrow(() -> new RuntimeException("Post not found with id: " + id));
+    }
+
 
     public SimpleResponse updateProfile(ProfileDetailUpdateDTO dto, AppLanguage lang) {
         Long profileId = SpringSecurityUtil.getCurrentUserId();
@@ -177,5 +185,22 @@ public class ProfileService {
     }
 
 
+    public SimpleResponse statusPost(String id, AppLanguage lang) {
+        Long adminId = SpringSecurityUtil.getCurrentUserId();
+
+        PostEntity post = getPostId(id);
+
+//        if (adminId.equals(post.getProfileId())) {
+//            throw new BadRequestException("You can't activate your own post");
+//        }
+
+        int updated = postRepository.togglePostStatus(id);
+
+        if (updated == 0) {
+            throw new BadRequestException("Post not found or already active");
+        }
+
+        return new SimpleResponse(HttpStatus.OK, bundleService.getMessage("post.status.successful", lang));
+    }
 
 }

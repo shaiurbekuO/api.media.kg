@@ -17,7 +17,7 @@ import java.util.Map;
 public class CustomPostRepository {
     private final EntityManager entityManager;
     public FilterResultDTO filter(PostFilterDTO filter, int page, int size) {
-        StringBuilder queryBuilder = new StringBuilder("where p.visible = true ");
+        StringBuilder queryBuilder = new StringBuilder("where p.visible = true and p.status = 'ACTIVE' ");
         Map<String, Object> params = new HashMap<>();
 
         // Проверка на наличие фильтра по названию
@@ -75,7 +75,7 @@ public class CustomPostRepository {
             queryBuilder.append(") ");
         }
 
-        String baseQuery = "select p.id, p.title, p.photoId, p.createdDate, pr.id, pr.name, pr.username " +
+        String baseQuery = "select p.id, p.title, p.photoId, p.createdDate, p.status, pr.id, pr.name, pr.username " +
                 "from PostEntity p inner join p.profile pr";
 
         String countQuery = "select count(p) from PostEntity p inner join p.profile pr";

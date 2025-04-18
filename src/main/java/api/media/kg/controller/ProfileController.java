@@ -94,4 +94,18 @@ public class ProfileController {
         return ResponseEntity.ok(profileService.delete(id, lang));
     }
 
+
+    @Operation(summary = "Activate Profile post",
+            description = "Admin can activate another user's notActive profile post")
+    @PutMapping("/{id}")
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
+    public ResponseEntity<SimpleResponse> statusPost(
+            @PathVariable("id") String id,
+            @RequestHeader(value = "Accept-Language", defaultValue = "EN") AppLanguage lang) {
+        return ResponseEntity.ok(profileService.statusPost(id, lang));
+    }
+
+
+
+
 }

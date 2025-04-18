@@ -21,6 +21,9 @@ import java.util.concurrent.CompletableFuture;
 @Service
 @Slf4j
 public class EmailSendingService {
+    @Value("${app.base-url}")
+    private String baseUrl;
+
     @Value("${spring.mail.username}")
     private String fromAccount;
     private final JavaMailSender javaMailSender;
@@ -86,7 +89,7 @@ public class EmailSendingService {
                         "<p>%s</p>\n" +
                         "<p>\n" +
                         "    %s <a class=\"link\"\n" +
-                        "           href=\"http://localhost:8080/api/auth/reg-emailVerification/%s?lang=%s\"\n" +
+                        "           href=\"https://f548-46-251-215-91.ngrok-free.app/api/auth/reg-emailVerification/%s?lang=%s\"\n" +
                         "           target=\"_blank\">%s</a>\n" +
                         "</p>\n" +
                         "\n" +

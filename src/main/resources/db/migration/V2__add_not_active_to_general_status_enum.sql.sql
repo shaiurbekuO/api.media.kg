@@ -1,0 +1,1 @@
+ALTER TYPE general_status ADD VALUE 'NOT_ACTIVE';

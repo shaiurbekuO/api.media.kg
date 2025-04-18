@@ -1,5 +1,6 @@
 package api.media.kg.entity;
 
+import api.media.kg.enums.GeneralStatus;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
@@ -34,6 +35,8 @@ public class PostEntity {
     private LocalDateTime createdDate = LocalDateTime.now();
     @Column(name = "visible")
     private Boolean visible = true;
-
+    @Column(name = "status")
+    @Enumerated(EnumType.STRING)
+    private GeneralStatus status;
 
 }

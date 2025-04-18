@@ -76,4 +76,5 @@ public interface ProfileRepository extends JpaRepository<ProfileEntity, Long>, P
     void delete(@Param("id") Long id);
 
 
+
 }
