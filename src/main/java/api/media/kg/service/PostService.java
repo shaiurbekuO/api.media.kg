@@ -6,6 +6,7 @@ import api.media.kg.dto.SimpleResponse;
 import api.media.kg.dto.post.*;
 import api.media.kg.entity.PostEntity;
 import api.media.kg.enums.AppLanguage;
+import api.media.kg.enums.GeneralStatus;
 import api.media.kg.enums.ProfileRole;
 import api.media.kg.exception.BadRequestException;
 import api.media.kg.repository.CustomPostRepository;
@@ -38,6 +39,7 @@ public class PostService {
         entity.setCreatedDate(LocalDateTime.now());
         entity.setVisible(true);
         entity.setProfileId(SpringSecurityUtil.getCurrentUserId());
+        entity.setStatus(GeneralStatus.NOT_ACTIVE);
         postRepository.save(entity);
         return toInfoDto(entity);
     }
@@ -128,22 +130,25 @@ public class PostService {
     }
 
 
-
     public PostDTO toDto(Object[] obj) {
         PostDTO post = new PostDTO();
         post.setId((String) obj[0]); // ID
         post.setTitle((String) obj[1]); // Title
+
         if (obj[2] != null) {
             post.setPhoto(attachService.attachDTO((String) obj[2])); // Photo
         }
         post.setCreatedDate((LocalDateTime) obj[3]); // CreatedDate
+        post.setStatus((GeneralStatus) obj[4]);  // Status
         ProfileDTO profile = new ProfileDTO();
-        profile.setId((Long) obj[4]); // Profile ID
-        profile.setName((String) obj[5]); // Profile Name
-        profile.setUsername((String) obj[6]); // Profile Username
+        profile.setId((Long) obj[5]); // Profile ID
+        profile.setName((String) obj[6]); // Profile Name
+        profile.setUsername((String) obj[7]); // Profile Username
+
         post.setProfile(profile);
         return post;
     }
+
 
 
 }

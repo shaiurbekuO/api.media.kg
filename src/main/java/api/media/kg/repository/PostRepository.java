@@ -20,8 +20,9 @@ public interface PostRepository extends JpaRepository<PostEntity, String>, Pagin
     Page<PostEntity> getAllByProfileAndVisibleTrueOrderByCreatedDateDesc(Long profileId, Pageable pageable);
 
     @Transactional
-    @Query("select p from PostEntity p where p.id != :exceptId and p.visible = true order by p.createdDate desc limit 3")
-    List<PostEntity> getSimilarPostList(String exceptId);
+    @Query("SELECT p FROM PostEntity p WHERE p.id != :exceptId AND p.visible = true AND p.status = 'ACTIVE' ORDER BY p.createdDate DESC")
+    List<PostEntity> getSimilarPostList(@Param("exceptId") String exceptId);
+
 
 
     @Modifying
@@ -33,4 +34,10 @@ public interface PostRepository extends JpaRepository<PostEntity, String>, Pagin
     @Transactional
     @Query("update PostEntity p set p.visible = false where p.id = :id")
     void delete(String id);
+    @Modifying
+    @Transactional
+    @Query("UPDATE PostEntity p SET p.status = CASE WHEN p.status = 'ACTIVE' THEN 'NOT_ACTIVE' ELSE 'ACTIVE' END WHERE p.id = :id")
+    int togglePostStatus(@Param("id") String id);
+
+
 }
